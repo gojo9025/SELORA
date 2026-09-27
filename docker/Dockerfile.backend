@@ -26,4 +26,4 @@ ENV DATA_ROOT=/app/data \
     SEED_DATA_DIR=/app/seed-data/raw
 
 EXPOSE 8000
-CMD ["sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
