@@ -80,8 +80,6 @@ export default function ResultsClient() {
   const tf = result.transformation;
 
   const confidence = m ? Math.round(m.confidence * 100) : 0;
-  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
   const handleExportPDF = async () => {
     if (!reportRef.current || !result) return;
     setIsExporting(true);
@@ -266,7 +264,7 @@ export default function ResultsClient() {
       </main>
 
       {!failed && (
-        <TelemetryReport ref={reportRef} result={result} API_BASE={API} />
+        <TelemetryReport ref={reportRef} result={result} />
       )}
     </div>
   );
@@ -363,10 +361,8 @@ function OverviewTab({ vis, overlayAlpha, onAlphaChange, matchView, onMatchViewC
   regId: string;
   metrics: RegistrationResult["metrics"] | null;
 }) {
-  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
   const imgSrc = (url: string | null | undefined) =>
-    url ? `${API}${url}` : "";
+    url ? imageUrl(url) : "";
 
   const hasGeoMetadata = metrics && (
     metrics.source_lat != null ||

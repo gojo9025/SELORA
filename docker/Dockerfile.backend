@@ -7,12 +7,23 @@ RUN apt-get update && apt-get install -y \
   libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1 \
   && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY backend/ .
+# Kept outside the persistent disk mount so a new disk can be initialized with
+# the built-in benchmark fixtures on first boot.
+COPY data/raw/demo_*.png /app/seed-data/raw/
 
 RUN mkdir -p /app/data/raw /app/data/processed/results /app/data/processed/visualizations
 
+ENV DATA_ROOT=/app/data \
+    UPLOAD_DIR=/app/data/raw \
+    PROCESSED_DIR=/app/data/processed \
+    RESULTS_DIR=/app/data/processed/results \
+    VISUALIZATIONS_DIR=/app/data/processed/visualizations \
+    DATABASE_PATH=/app/data/selora.db \
+    SEED_DATA_DIR=/app/seed-data/raw
+
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]

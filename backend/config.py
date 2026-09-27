@@ -15,6 +15,13 @@ class Settings(BaseSettings):
     PROCESSED_DIR: str = str(_PROJECT_ROOT / "data" / "processed")
     RESULTS_DIR: str = str(_PROJECT_ROOT / "data" / "processed" / "results")
     VISUALIZATIONS_DIR: str = str(_PROJECT_ROOT / "data" / "processed" / "visualizations")
+    DATABASE_PATH: str = str(_PROJECT_ROOT / "data" / "selora.db")
+    SEED_DATA_DIR: str = str(_PROJECT_ROOT / "data" / "raw")
+
+    # Browser access
+    # Use a comma-separated value in deployment, for example:
+    # CORS_ORIGINS=https://selora.vercel.app
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
 
     # Upload limits
     MAX_FILE_SIZE_MB: int = 200
@@ -50,6 +57,10 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [origin.strip().rstrip("/") for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
 
 settings = Settings()

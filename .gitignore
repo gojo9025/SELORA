@@ -26,6 +26,10 @@ htmlcov/
 .nox/
 .hypothesis/
 
+# The Next.js API client is source code, not a Python virtualenv library.
+!frontend/lib/
+!frontend/lib/**
+
 # Node.js
 node_modules/
 npm-debug.log

@@ -3,8 +3,8 @@ version: "3.9"
 services:
   backend:
     build:
-      context: ./backend
-      dockerfile: ../docker/Dockerfile.backend
+      context: .
+      dockerfile: docker/Dockerfile.backend
     container_name: selora-backend
     ports:
       - "8000:8000"
@@ -16,17 +16,21 @@ services:
       - RESULTS_DIR=/app/data/processed/results
       - VISUALIZATIONS_DIR=/app/data/processed/visualizations
       - DATA_ROOT=/app/data
+      - DATABASE_PATH=/app/data/selora.db
+      - SEED_DATA_DIR=/app/seed-data/raw
     restart: unless-stopped
 
   frontend:
     build:
       context: ./frontend
       dockerfile: ../docker/Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     container_name: selora-frontend
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     depends_on:
       - backend
     restart: unless-stopped

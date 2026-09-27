@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import List, Optional
 from loguru import logger
 from schemas import RegistrationResult
+from config import settings
 
-DB_PATH = Path(__file__).parent.parent.parent / "selora.db"
+DB_PATH = Path(settings.DATABASE_PATH)
 
 def _get_conn():
     conn = sqlite3.connect(str(DB_PATH))
@@ -13,6 +14,7 @@ def _get_conn():
     return conn
 
 def init_db():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     logger.info(f"Initializing SQLite database at {DB_PATH}")
     with _get_conn() as conn:
         conn.execute("""

@@ -4,7 +4,7 @@ Sensor-aware Lunar Image Registration & Optical Alignment
 SIH Problem Statement 26166
 """
 
-import uuid
+import shutil
 from pathlib import Path
 from contextlib import asynccontextmanager
 
@@ -27,6 +27,17 @@ async def lifespan(app: FastAPI):
         settings.VISUALIZATIONS_DIR,
     ]:
         Path(d).mkdir(parents=True, exist_ok=True)
+
+    # A mounted production disk starts empty. Seed only the bundled benchmark
+    # inputs, without replacing user uploads or prior processing results.
+    seed_dir = Path(settings.SEED_DATA_DIR)
+    upload_dir = Path(settings.UPLOAD_DIR)
+    if seed_dir.exists() and seed_dir.resolve() != upload_dir.resolve():
+        for seed_file in seed_dir.glob("demo_*.png"):
+            target = upload_dir / seed_file.name
+            if not target.exists():
+                shutil.copy2(seed_file, target)
+
     logger.info("SELORA backend started — storage directories ready")
     yield
     logger.info("SELORA backend shutting down")
@@ -39,11 +50,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — allow frontend dev server
+# CORS — development origins by default; set CORS_ORIGINS for the Vercel domain
+# in production. The app has no cookie-authenticated endpoints, so credentials
+# are intentionally disabled.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001", "*"],
-    allow_credentials=True,
+    allow_origins=settings.cors_origins,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

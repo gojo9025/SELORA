@@ -1,13 +1,12 @@
 import React, { forwardRef } from "react";
-import type { RegistrationResult } from "@/lib/api";
+import { imageUrl, type RegistrationResult } from "@/lib/api";
 
 interface TelemetryReportProps {
   result: RegistrationResult;
-  API_BASE: string;
 }
 
 const TelemetryReport = forwardRef<HTMLDivElement, TelemetryReportProps>(
-  ({ result, API_BASE }, ref) => {
+  ({ result }, ref) => {
     const {
       registration_id,
       source_sensor,
@@ -178,7 +177,7 @@ const TelemetryReport = forwardRef<HTMLDivElement, TelemetryReportProps>(
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "4px" }}>DIFFERENCE MAP</div>
                   <img
-                    src={`${API_BASE}${visualizations.difference_map}`}
+                    src={imageUrl(visualizations.difference_map)}
                     crossOrigin="anonymous"
                     style={{ width: "100%", border: "1px solid #ddd" }}
                   />
@@ -188,7 +187,7 @@ const TelemetryReport = forwardRef<HTMLDivElement, TelemetryReportProps>(
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "4px" }}>ALPHA BLEND OVERLAY</div>
                   <img
-                    src={`${API_BASE}${visualizations.overlay_image}`}
+                    src={imageUrl(visualizations.overlay_image)}
                     crossOrigin="anonymous"
                     style={{ width: "100%", border: "1px solid #ddd" }}
                   />
@@ -200,7 +199,7 @@ const TelemetryReport = forwardRef<HTMLDivElement, TelemetryReportProps>(
               <div style={{ width: "100%", pageBreakInside: "avoid" }}>
                 <div style={{ fontSize: "10px", fontWeight: "bold", marginBottom: "4px" }}>INLIER MATCH CORRESPONDENCES</div>
                 <img
-                  src={`${API_BASE}${visualizations.match_visualization}`}
+                  src={imageUrl(visualizations.match_visualization)}
                   crossOrigin="anonymous"
                   style={{ width: "100%", border: "1px solid #ddd" }}
                 />
