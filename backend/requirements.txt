@@ -1,0 +1,35 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+
+# Core CV
+opencv-python-headless
+numpy
+scipy
+scikit-image
+Pillow
+
+# Utilities
+aiofiles
+python-jose
+httpx
+loguru
+tqdm
+
+# Optional: GeoTIFF support (uncomment if GDAL is available)
+# rasterio
+
+# Optional: ML features (uncomment if GPU/PyTorch available)
+# torch
+# kornia
+# torchvision
+
+# Testing
+pytest
+pytest-asyncio
+httpx
+torch
+torchvision
+kornia

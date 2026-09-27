@@ -1,0 +1,76 @@
+{
+  "pairs": [
+    {
+      "name": "OHRC <-> LRO NAC",
+      "source": "demo_ohrc_lro_source.png",
+      "reference": "demo_ohrc_lro_reference.png",
+      "source_sensor": "OHRC",
+      "reference_sensor": "LRO_NAC",
+      "ground_truth": {
+        "rotation_deg": 8.5,
+        "scale": 0.92,
+        "tx": 5,
+        "ty": -3
+      },
+      "difficulty": "medium",
+      "description": "Cross-mission registration: Chandrayaan-2 OHRC vs NASA LRO Narrow Angle Camera"
+    },
+    {
+      "name": "OHRC <-> TMC-2",
+      "source": "demo_ohrc_tmc2_source.png",
+      "reference": "demo_ohrc_tmc2_reference.png",
+      "source_sensor": "OHRC",
+      "reference_sensor": "TMC2",
+      "ground_truth": {
+        "rotation_deg": 3.2,
+        "scale": 0.25
+      },
+      "difficulty": "hard",
+      "description": "Cross-resolution: 0.25m OHRC vs 5m TMC-2 (20x GSD ratio)"
+    },
+    {
+      "name": "OHRC <-> IIRS",
+      "source": "demo_ohrc_iirs_source.png",
+      "reference": "demo_ohrc_iirs_reference.png",
+      "source_sensor": "OHRC",
+      "reference_sensor": "IIRS",
+      "ground_truth": {
+        "rotation_deg": 0,
+        "scale": 0.0625
+      },
+      "difficulty": "extreme",
+      "description": "Cross-modal: 0.25m panchromatic OHRC vs 80m hyperspectral IIRS (320x GSD ratio)"
+    },
+    {
+      "name": "Illumination Shift",
+      "source": "demo_illumination_east.png",
+      "reference": "demo_illumination_west.png",
+      "source_sensor": "OHRC",
+      "reference_sensor": "OHRC",
+      "ground_truth": {
+        "rotation_deg": 2.0,
+        "scale": 1.0,
+        "tx": 3,
+        "ty": -2
+      },
+      "difficulty": "hard",
+      "description": "Same-sensor opposing illumination: East vs West solar azimuth"
+    },
+    {
+      "name": "Same-Sensor Easy",
+      "source": "demo_easy_source.png",
+      "reference": "demo_easy_reference.png",
+      "source_sensor": "OHRC",
+      "reference_sensor": "OHRC",
+      "ground_truth": {
+        "rotation_deg": 1.5,
+        "scale": 1.02,
+        "tx": 2,
+        "ty": 1
+      },
+      "difficulty": "easy",
+      "description": "Same-sensor baseline: small rotation + translation for regression testing"
+    }
+  ],
+  "generated_by": "SELORA setup_demo_dataset.py"
+}
