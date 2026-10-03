@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Satellite, ArrowLeft, Play, Loader2, BarChart3, TrendingUp } from "lucide-react";
+import { motion } from "framer-motion";
 import { uploadImage, uploadPreset, runBenchmark, imageUrl } from "@/lib/api";
 import type { BenchmarkResult } from "@/lib/api";
 import {
@@ -151,8 +152,18 @@ export default function BenchmarkPage() {
         </div>
       </header>
 
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "2rem" }}>
-        <div style={{ marginBottom: 24 }}>
+      <motion.main 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        style={{ maxWidth: 1100, margin: "0 auto", padding: "2rem" }}
+      >
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          style={{ marginBottom: 24 }}
+        >
           <h1 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: 8 }}>
             Algorithm Comparison
           </h1>
@@ -162,10 +173,16 @@ export default function BenchmarkPage() {
           <div style={{ marginTop: 8, padding: "8px 12px", background: "rgba(168, 85, 247, 0.1)", border: "1px solid rgba(168, 85, 247, 0.3)", borderRadius: "var(--radius)", fontSize: 12, color: "#c084fc", display: "inline-flex", alignItems: "center", gap: 6 }}>
             <span>⚡ Note: LoFTR runs slowly on CPU (~20-60s per pair).</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Preset Selector & Upload zone */}
-        <div className="selora-card" style={{ marginBottom: 24 }}>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="selora-card" 
+          style={{ marginBottom: 24, background: "rgba(22, 28, 38, 0.7)", backdropFilter: "blur(12px)", border: "1px solid rgba(0, 200, 255, 0.1)" }}
+        >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div className="text-label">Evaluation Benchmark Pair</div>
             <Link href="/benchmark/compare">
@@ -318,12 +335,16 @@ export default function BenchmarkPage() {
           {error && (
             <div style={{ marginTop: 12, color: "var(--error)", fontSize: 13 }}>{error}</div>
           )}
-        </div>
+        </motion.div>
 
         {/* Results table */}
         {result && (
-          <>
-            <div className="selora-card" style={{ marginBottom: 20 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, staggerChildren: 0.1 }}
+          >
+            <div className="selora-card" style={{ marginBottom: 20, border: "1px solid rgba(0, 200, 255, 0.2)", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }}>
               <div className="text-label" style={{ marginBottom: 16 }}>Benchmark Results</div>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -440,7 +461,7 @@ export default function BenchmarkPage() {
                 </ResponsiveContainer>
               </div>
             </div>
-          </>
+          </motion.div>
         )}
 
         {!result && !loading && (
@@ -455,7 +476,7 @@ export default function BenchmarkPage() {
             <div>Upload an image pair and run the benchmark to compare methods.</div>
           </div>
         )}
-      </main>
+      </motion.main>
     </div>
   );
 }

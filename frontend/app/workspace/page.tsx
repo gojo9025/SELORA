@@ -8,7 +8,7 @@ import {
   Loader2, Play, ArrowLeft, Info,
 } from "lucide-react";
 import { useEffect } from "react";
-import { uploadImage, registerImages, getRegistrations, imageUrl } from "@/lib/api";
+import { uploadImage, registerImages, getRegistrations, imageUrl, uploadPreset } from "@/lib/api";
 import type { SensorType, RegistrationMode, RegistrationResult } from "@/lib/api";
 import { SENSOR_OPTIONS, MODE_OPTIONS, STAGE_LABELS, type ProcessingStage } from "@/lib/types";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -111,6 +111,39 @@ export default function WorkspacePage() {
     }
   };
 
+  const handleLoadDemo = async () => {
+    try {
+      setStage("uploading" as ProcessingStage);
+      setError(null);
+      const pData = await uploadPreset("same_sensor");
+      
+      setSource({
+        file: new File([""], "demo_source.png", { type: "image/png" }),
+        previewUrl: imageUrl(pData.source_image_id),
+        imageId: pData.source_image_id,
+        sensor: "OHRC",
+        width: 1024,
+        height: 1024
+      });
+      setSrcSensor("auto");
+
+      setReference({
+        file: new File([""], "demo_reference.png", { type: "image/png" }),
+        previewUrl: imageUrl(pData.reference_image_id),
+        imageId: pData.reference_image_id,
+        sensor: "OHRC",
+        width: 1024,
+        height: 1024
+      });
+      setRefSensor("auto");
+      
+    } catch (err: unknown) {
+      setError(`Demo load failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setStage("idle");
+    }
+  };
+
   const handleRegister = async () => {
     if (!source || !reference) return;
     setError(null);
@@ -176,7 +209,12 @@ export default function WorkspacePage() {
         </Link>
       </header>
 
-      <main style={{ flex: 1, maxWidth: 1200, width: "100%", margin: "0 auto", padding: "2rem", position: "relative", zIndex: 10 }}>
+      <motion.main 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        style={{ flex: 1, maxWidth: 1200, width: "100%", margin: "0 auto", padding: "2rem", position: "relative", zIndex: 10 }}
+      >
         {/* ── Error Banner ── */}
         {error && (
           <div
@@ -200,12 +238,15 @@ export default function WorkspacePage() {
         )}
 
         {/* ── Upload Zone ── */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gap: 20,
-            marginBottom: 24,
+            gap: 24,
+            marginBottom: 32,
           }}
         >
           {/* Source */}
@@ -240,12 +281,15 @@ export default function WorkspacePage() {
         </div>
 
         {/* ── Configuration ── */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
           className="selora-card"
-          style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}
+          style={{ marginBottom: 32, display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap", background: "rgba(22, 28, 38, 0.7)", backdropFilter: "blur(12px)", border: "1px solid rgba(0, 200, 255, 0.1)" }}
         >
           <div style={{ flex: 1, minWidth: 200 }}>
-            <div className="text-label" style={{ marginBottom: 8 }}>Registration Mode</div>
+            <div className="text-label" style={{ marginBottom: 8 }}>Accuracy vs Speed (Registration Mode)</div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {MODE_OPTIONS.map((opt) => (
                 <button
@@ -393,10 +437,19 @@ export default function WorkspacePage() {
                 <div style={{ color: "var(--text-muted)" }}>No registrations found. Upload images above to get started.</div>
               </div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+              <motion.div 
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+                }}
+                style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}
+              >
                 {history.map((reg) => (
-                  <Link href={`/results/${reg.registration_id}`} key={reg.registration_id} style={{ textDecoration: "none" }}>
-                    <div className="selora-card" style={{ padding: 16, cursor: "pointer", transition: "transform 0.1s, border-color 0.1s", ':hover': { transform: "translateY(-2px)", borderColor: "var(--accent-cyan)" } } as any}>
+                  <motion.div key={reg.registration_id} variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+                    <Link href={`/results/${reg.registration_id}`} style={{ textDecoration: "none" }}>
+                      <motion.div whileHover={{ scale: 1.03, y: -4, borderColor: "rgba(0, 200, 255, 0.5)", boxShadow: "0 10px 30px rgba(0,0,0,0.3)" }} className="selora-card" style={{ padding: 20, cursor: "pointer", transition: "border-color 0.2s", background: "rgba(22,28,38,0.5)" } as any}>
                       <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
@@ -429,10 +482,11 @@ export default function WorkspacePage() {
                           )}
                         </div>
                       </div>
-                    </div>
-                  </Link>
+                      </motion.div>
+                    </Link>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
           </div>
         )}
@@ -451,8 +505,13 @@ export default function WorkspacePage() {
             <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
               <Info size={16} color="var(--accent-cyan)" style={{ marginTop: 2, flexShrink: 0 }} />
               <div>
-                <div style={{ fontWeight: 600, marginBottom: 8, color: "var(--text-primary)" }}>
-                  Getting Started
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>
+                    Getting Started (Easy Mode)
+                  </div>
+                  <button onClick={handleLoadDemo} className="btn-primary" style={{ padding: "6px 12px", fontSize: 12 }}>
+                    Try with Demo Images
+                  </button>
                 </div>
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                   {[
@@ -491,7 +550,7 @@ export default function WorkspacePage() {
             </div>
           </div>
         )}
-      </main>
+      </motion.main>
     </div>
   );
 }

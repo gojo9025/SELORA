@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "SELORA aligns Chandrayaan-2 lunar imagery across OHRC, TMC-2, and IIRS sensors with sensor-aware, multi-scale registration and quantitative confidence metrics.",
   keywords: [
     "SELORA", "lunar image registration", "Chandrayaan-2", "OHRC", "TMC-2", "IIRS",
-    "remote sensing", "computer vision", "image alignment", "ISRO", "SIH 2026",
+    "remote sensing", "computer vision", "image alignment", "ISRO"
   ],
   openGraph: {
     title: "SELORA — Sensor-aware Lunar Image Registration",

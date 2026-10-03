@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Satellite, ChevronRight, Zap, Shield, BarChart3,
   Layers, ArrowRight, Orbit, Sparkles,
@@ -21,25 +21,29 @@ const FEATURES = [
     icon: Layers,
     title: "Sensor-Aware Pipeline",
     desc: "Adapts preprocessing, feature extraction, and matching to OHRC, TMC-2, and IIRS sensor characteristics.",
-    gradient: "linear-gradient(135deg, #00c8ff22, #6366f122)",
+    gradient: "linear-gradient(135deg, rgba(0,200,255,0.08), rgba(99,102,241,0.08))",
+    border: "rgba(0, 200, 255, 0.3)",
   },
   {
     icon: Zap,
     title: "Multi-Scale Registration",
     desc: "Image pyramids enable robust matching despite significant resolution differences between sensors.",
-    gradient: "linear-gradient(135deg, #6366f122, #a855f722)",
+    gradient: "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.08))",
+    border: "rgba(168, 85, 247, 0.3)",
   },
   {
     icon: Shield,
     title: "Geometric Verification",
     desc: "RANSAC with USAC_MAGSAC rejects outliers. Multi-model comparison selects the most stable transform.",
-    gradient: "linear-gradient(135deg, #00c8ff22, #22d3a522)",
+    gradient: "linear-gradient(135deg, rgba(0,200,255,0.08), rgba(34,211,165,0.08))",
+    border: "rgba(34, 211, 165, 0.3)",
   },
   {
     icon: BarChart3,
     title: "Quantitative Confidence",
     desc: "Every registration produces RMSE, inlier ratio, spatial coverage, and a documented confidence score.",
-    gradient: "linear-gradient(135deg, #22d3a522, #00c8ff22)",
+    gradient: "linear-gradient(135deg, rgba(34,211,165,0.08), rgba(0,200,255,0.08))",
+    border: "rgba(0, 200, 255, 0.3)",
   },
 ];
 
@@ -61,37 +65,91 @@ const PIPELINE_STAGES = [
 ];
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 40, filter: "blur(10px)", scale: 0.95 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+    filter: "blur(0px)",
+    scale: 1,
+    transition: { 
+      delay: i * 0.1, 
+      duration: 0.8, 
+      ease: [0.16, 1, 0.3, 1] 
+    },
   }),
 };
 
 const staggerContainer = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 } 
+  },
 };
 
 export default function LandingPage() {
   const [showLaunch, setShowLaunch] = useState(true);
+  
+  // Parallax effects
+  const { scrollY } = useScroll();
+  
+  const yHero = useTransform(scrollY, [0, 800], [0, 250]);
+  const opacityHero = useTransform(scrollY, [0, 400], [1, 0]);
+  const scaleHero = useTransform(scrollY, [0, 400], [1, 0.9]);
+
+  const yBgGlow1 = useTransform(scrollY, [0, 1000], [0, 300]);
+  const yBgGlow2 = useTransform(scrollY, [0, 1000], [0, -300]);
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--bg-base)", position: "relative" }}>
+    <div className="min-h-screen" style={{ background: "var(--bg-base)", position: "relative", overflowX: "hidden" }}>
       {/* ── Cinematic Launch Sequence Animation ── */}
       {showLaunch && (
         <LaunchAnimation onComplete={() => setShowLaunch(false)} />
       )}
 
       {/* ── 3D Background ── */}
-      <MoonScene />
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }}>
+        <MoonScene />
+      </div>
+
+      {/* ── Ambient Background Glows ── */}
+      <motion.div 
+        style={{
+          position: "fixed",
+          top: "10%",
+          left: "-10%",
+          width: "50vw",
+          height: "50vw",
+          background: "radial-gradient(circle, rgba(0,200,255,0.06) 0%, transparent 60%)",
+          filter: "blur(80px)",
+          zIndex: 0,
+          y: yBgGlow1
+        }}
+      />
+      <motion.div 
+        style={{
+          position: "fixed",
+          bottom: "10%",
+          right: "-10%",
+          width: "40vw",
+          height: "40vw",
+          background: "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 60%)",
+          filter: "blur(80px)",
+          zIndex: 0,
+          y: yBgGlow2
+        }}
+      />
 
       {/* ── Content Layer ── */}
       <div style={{ position: "relative", zIndex: 1 }}>
 
         {/* ── Nav ── */}
-        <nav className="glass-nav">
+        <motion.nav 
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="glass-nav"
+        >
           <div
             style={{
               maxWidth: 1200,
@@ -100,67 +158,79 @@ export default function LandingPage() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              height: 64,
+              height: 70,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div className="nav-logo-glow">
-                <Satellite size={18} color="var(--accent-cyan)" />
-              </div>
-              <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: "0.08em" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <motion.div 
+                whileHover={{ rotate: 90, scale: 1.1 }}
+                transition={{ duration: 0.4 }}
+                className="nav-logo-glow"
+              >
+                <Satellite size={20} color="var(--accent-cyan)" />
+              </motion.div>
+              <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: "0.1em", textShadow: "0 0 10px rgba(0,200,255,0.4)" }}>
                 SELORA
               </span>
-              <span className="badge badge-cyan" style={{ marginLeft: 4 }}>
-                SIH 2026
-              </span>
             </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <button
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowLaunch(true)}
                 className="btn-glass"
-                style={{ fontSize: 12, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}
+                style={{ fontSize: 13, padding: "8px 16px", display: "flex", alignItems: "center", gap: 6 }}
                 title="Replay Cinematic Intro"
               >
-                <Sparkles size={13} color="var(--accent-cyan)" />
-                <span>Replay Intro</span>
-              </button>
+                <Sparkles size={14} color="var(--accent-cyan)" />
+                <span className="hidden sm:inline">Replay Intro</span>
+              </motion.button>
               <Link href="/benchmark">
-                <button className="btn-glass">Benchmark</button>
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="btn-glass">Benchmark</motion.button>
               </Link>
               <Link href="/workspace">
-                <button className="btn-primary">
-                  Launch Workspace <ArrowRight size={14} />
-                </button>
+                <motion.button 
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(0,200,255,0.5)" }} 
+                  whileTap={{ scale: 0.95 }} 
+                  className="btn-primary"
+                >
+                  Workspace <ArrowRight size={16} />
+                </motion.button>
               </Link>
             </div>
           </div>
-        </nav>
+        </motion.nav>
 
         {/* ── Hero ── */}
-        <section style={{ padding: "140px 2rem 100px", textAlign: "center", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <section style={{ padding: "160px 2rem 120px", textAlign: "center", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <motion.div
-            style={{ maxWidth: 780, margin: "0 auto" }}
+            style={{ maxWidth: 820, margin: "0 auto", y: yHero, opacity: opacityHero, scale: scaleHero }}
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
           >
             {/* Orbit badge */}
-            <motion.div variants={fadeUp} custom={0} style={{ marginBottom: 28 }}>
-              <div className="hero-orbit-badge">
-                <Orbit size={14} />
-                <span>ISRO CHANDRAYAAN-2 SCIENCE NETWORK • PS 26166</span>
-              </div>
+            <motion.div variants={fadeUp} custom={0} style={{ marginBottom: 32, display: "flex", justifyContent: "center" }}>
+              <motion.div 
+                whileHover={{ scale: 1.05, borderColor: "rgba(0, 200, 255, 0.5)" }}
+                className="hero-orbit-badge glass-card"
+                style={{ padding: "8px 20px", borderRadius: 30, background: "rgba(0,200,255,0.05)" }}
+              >
+                <Orbit size={16} className="pulse-glow" />
+                <span style={{ letterSpacing: "0.08em" }}>ISRO CHANDRAYAAN-2 SCIENCE NETWORK</span>
+              </motion.div>
             </motion.div>
 
             <motion.h1
               variants={fadeUp}
               custom={1}
               style={{
-                fontSize: "clamp(3.2rem, 8vw, 5.2rem)",
+                fontSize: "clamp(3.5rem, 9vw, 6rem)",
                 fontWeight: 900,
-                lineHeight: 1.02,
-                marginBottom: 16,
-                letterSpacing: "-0.03em",
+                lineHeight: 1.05,
+                marginBottom: 20,
+                letterSpacing: "-0.04em",
+                textShadow: "0 10px 30px rgba(0,0,0,0.5)"
               }}
             >
               <span style={{ color: "var(--text-primary)" }}>SELORA</span>
@@ -170,14 +240,14 @@ export default function LandingPage() {
               variants={fadeUp}
               custom={2}
               style={{
-                fontSize: "clamp(1.2rem, 3.2vw, 1.85rem)",
-                fontWeight: 700,
-                lineHeight: 1.3,
-                marginBottom: 24,
-                letterSpacing: "-0.015em",
+                fontSize: "clamp(1.4rem, 3.5vw, 2.2rem)",
+                fontWeight: 800,
+                lineHeight: 1.4,
+                marginBottom: 32,
+                letterSpacing: "-0.02em",
               }}
             >
-              <span className="hero-gradient-text">
+              <span className="hero-gradient-text" style={{ textShadow: "0 0 20px rgba(0,200,255,0.2)" }}>
                 Cross-Mission Lunar Image Correspondence & Registration
               </span>
             </motion.div>
@@ -186,10 +256,11 @@ export default function LandingPage() {
               variants={fadeUp}
               custom={3}
               style={{
-                fontSize: "1.1rem",
+                fontSize: "1.2rem",
                 color: "var(--text-secondary)",
-                marginBottom: 16,
-                lineHeight: 1.7,
+                marginBottom: 20,
+                lineHeight: 1.8,
+                fontWeight: 500,
               }}
             >
               Aligning the Moon across sensors, scales, and illumination conditions.
@@ -199,12 +270,12 @@ export default function LandingPage() {
               variants={fadeUp}
               custom={4}
               style={{
-                fontSize: "0.9rem",
+                fontSize: "1rem",
                 color: "var(--text-muted)",
-                marginBottom: 48,
-                maxWidth: 540,
-                margin: "0 auto 48px",
-                lineHeight: 1.7,
+                marginBottom: 56,
+                maxWidth: 600,
+                margin: "0 auto 56px",
+                lineHeight: 1.8,
               }}
             >
               SELORA dynamically adapts its registration pipeline to the characteristics
@@ -215,59 +286,76 @@ export default function LandingPage() {
             <motion.div
               variants={fadeUp}
               custom={5}
-              style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}
+              style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap" }}
             >
               <Link href="/workspace">
-                <button className="btn-hero-primary">
-                  <Sparkles size={16} />
+                <motion.button 
+                  whileHover={{ scale: 1.05, y: -4 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-hero-primary"
+                >
+                  <Sparkles size={18} />
                   Launch Workspace
-                </button>
+                </motion.button>
               </Link>
               <Link href="/benchmark">
-                <button className="btn-hero-secondary">
-                  <BarChart3 size={16} />
+                <motion.button 
+                  whileHover={{ scale: 1.05, y: -4, backgroundColor: "rgba(30, 37, 53, 0.8)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-hero-secondary"
+                >
+                  <BarChart3 size={18} />
                   View Benchmark
-                </button>
+                </motion.button>
               </Link>
             </motion.div>
 
             {/* Scroll indicator */}
             <motion.div
               variants={fadeUp}
-              custom={5}
+              custom={6}
               className="scroll-indicator"
-              style={{ marginTop: 80 }}
+              style={{ marginTop: 100 }}
             >
-              <div className="scroll-line" />
+              <motion.div 
+                animate={{ y: [0, 10, 0], opacity: [0.3, 1, 0.3] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                className="scroll-line" 
+                style={{ height: 60, width: 2, background: "linear-gradient(180deg, var(--accent-cyan), transparent)" }}
+              />
             </motion.div>
           </motion.div>
         </section>
 
         {/* ── Sensor Cards ── */}
-        <section style={{ maxWidth: 1000, margin: "0 auto", padding: "0 2rem 80px" }}>
+        <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 2rem 120px" }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "-100px", amount: 0.2 }}
             variants={staggerContainer}
-            style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}
+            style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}
           >
             {SENSORS.map((s, i) => (
-              <motion.div key={s.name} variants={fadeUp} custom={i}>
-                <div className="glass-card sensor-card-3d">
-                  <div className="sensor-icon-ring">
-                    <span style={{ fontSize: 28 }}>{s.icon}</span>
-                  </div>
+              <motion.div key={s.name} variants={fadeUp} custom={i} whileHover={{ y: -10 }}>
+                <div className="glass-card sensor-card-3d" style={{ background: "rgba(14, 17, 23, 0.4)", backdropFilter: "blur(20px)" }}>
+                  <motion.div 
+                    whileHover={{ rotate: 360, scale: 1.1 }}
+                    transition={{ duration: 0.8 }}
+                    className="sensor-icon-ring"
+                  >
+                    <span style={{ fontSize: 32 }}>{s.icon}</span>
+                  </motion.div>
                   <div
                     className="text-glow-cyan"
-                    style={{ fontSize: "1.6rem", fontWeight: 800, marginBottom: 4 }}
+                    style={{ fontSize: "1.8rem", fontWeight: 900, marginBottom: 8 }}
                   >
                     {s.name}
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.06em", marginBottom: 10 }}>
+                  <div style={{ fontSize: 13, color: "var(--text-muted)", letterSpacing: "0.08em", marginBottom: 16 }}>
                     {s.desc}
                   </div>
-                  <div className="badge badge-cyan">{s.res} GSD</div>
+                  <div className="badge badge-cyan" style={{ fontSize: 11, padding: "4px 10px" }}>{s.res} GSD</div>
                 </div>
               </motion.div>
             ))}
@@ -275,31 +363,32 @@ export default function LandingPage() {
         </section>
 
         {/* ── Pipeline Visualization ── */}
-        <section style={{ maxWidth: 1000, margin: "0 auto", padding: "0 2rem 80px" }}>
+        <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 2rem 120px" }}>
           <motion.div
             className="glass-card"
-            initial="hidden"
-            whileInView="visible"
+            initial={{ opacity: 0, scale: 0.95, y: 50, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true, margin: "-100px" }}
-            variants={fadeUp}
-            custom={0}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            style={{ background: "rgba(14, 17, 23, 0.5)", border: "1px solid rgba(0, 200, 255, 0.15)", overflow: "hidden" }}
           >
-            <div className="text-label" style={{ textAlign: "center", marginBottom: 28 }}>
+            <div className="text-label" style={{ textAlign: "center", marginBottom: 40, fontSize: 13, color: "var(--accent-cyan)", textShadow: "0 0 10px rgba(0,200,255,0.3)" }}>
               End-to-End Registration Pipeline
             </div>
             <motion.div
               variants={staggerContainer}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true }}
-              style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}
+              viewport={{ once: true, margin: "-50px" }}
+              style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}
             >
               {PIPELINE_STAGES.map((stage, i) => (
-                <motion.div key={stage} variants={fadeUp} custom={i}>
-                  <div className="pipeline-step-3d">
-                    <span className="pipeline-num">{String(i + 1).padStart(2, "0")}</span>
-                    <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{stage}</span>
-                    {i < PIPELINE_STAGES.length - 1 && <div className="pipeline-connector" />}
+                <motion.div key={stage} variants={fadeUp} custom={i} whileHover={{ scale: 1.05 }}>
+                  <div className="pipeline-step-3d" style={{ background: "rgba(30, 37, 53, 0.4)", display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 10px", textAlign: "center", gap: 12 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(0,200,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(0,200,255,0.3)", color: "var(--accent-cyan)", fontWeight: "bold", fontSize: 14, fontFamily: "monospace" }}>
+                      {String(i + 1).padStart(2, "0")}
+                    </div>
+                    <span style={{ fontSize: 14, color: "var(--text-primary)", fontWeight: 600 }}>{stage}</span>
                   </div>
                 </motion.div>
               ))}
@@ -308,71 +397,87 @@ export default function LandingPage() {
         </section>
 
         {/* ── Features ── */}
-        <section style={{ maxWidth: 1000, margin: "0 auto", padding: "0 2rem 80px" }}>
+        <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 2rem 120px" }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "-100px", amount: 0.1 }}
             variants={staggerContainer}
-            style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20 }}
+            style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: 24 }}
           >
-            {FEATURES.map(({ icon: Icon, title, desc, gradient }, i) => (
+            {FEATURES.map(({ icon: Icon, title, desc, gradient, border }, i) => (
               <motion.div key={title} variants={fadeUp} custom={i}>
-                <div className="glass-card feature-card-3d" style={{ background: gradient }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-                    <div className="feature-icon-box">
-                      <Icon size={20} color="var(--accent-cyan)" />
+                <motion.div 
+                  whileHover={{ scale: 1.02, y: -5, borderColor: border }}
+                  className="glass-card feature-card-3d" 
+                  style={{ background: gradient, borderColor: "rgba(30, 37, 53, 0.8)", padding: "2.5rem 2rem" }}
+                >
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 24 }}>
+                    <div className="feature-icon-box" style={{ width: 60, height: 60, background: "rgba(0,0,0,0.3)", borderRadius: 16 }}>
+                      <Icon size={30} color="var(--accent-cyan)" />
                     </div>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8, color: "var(--text-primary)" }}>
+                      <div style={{ fontWeight: 800, fontSize: 19, marginBottom: 12, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
                         {title}
                       </div>
-                      <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                      <div style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.8 }}>
                         {desc}
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               </motion.div>
             ))}
           </motion.div>
         </section>
 
         {/* ── CTA Banner ── */}
-        <section style={{ padding: "0 2rem 100px" }}>
+        <section style={{ padding: "0 2rem 140px" }}>
           <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
-            custom={0}
+            initial={{ opacity: 0, y: 60, scale: 0.95, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="glass-card cta-banner-3d" style={{ maxWidth: 800, margin: "0 auto", textAlign: "center", padding: "60px 40px" }}>
+            <div className="glass-card cta-banner-3d" style={{ maxWidth: 900, margin: "0 auto", textAlign: "center", padding: "80px 40px", background: "linear-gradient(180deg, rgba(14, 17, 23, 0.4) 0%, rgba(0, 200, 255, 0.05) 100%)", borderColor: "rgba(0, 200, 255, 0.2)" }}>
               <div className="cta-glow-line" />
-              <h2 style={{ fontSize: "1.9rem", fontWeight: 800, marginBottom: 14, letterSpacing: "-0.02em" }}>
-                Ready to register lunar imagery?
-              </h2>
-              <p style={{ color: "var(--text-secondary)", marginBottom: 36, fontSize: 15 }}>
-                Upload your source and reference images. SELORA handles the rest.
+              <motion.div 
+                animate={{ scale: [1, 1.01, 1] }} 
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <h2 style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 900, marginBottom: 20, letterSpacing: "-0.03em", color: "var(--text-primary)", textShadow: "0 4px 20px rgba(0,0,0,0.5)" }}>
+                  Ready to register lunar imagery?
+                </h2>
+              </motion.div>
+              <p style={{ color: "var(--text-secondary)", marginBottom: 44, fontSize: 16, maxWidth: 540, margin: "0 auto 44px", lineHeight: 1.8 }}>
+                Upload your source and reference images. SELORA handles the rest with precision and confidence.
               </p>
               <Link href="/workspace">
-                <button className="btn-hero-primary" style={{ fontSize: 15 }}>
-                  Open Workspace <ChevronRight size={16} />
-                </button>
+                <motion.button 
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(0,200,255,0.6)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-hero-primary" 
+                  style={{ fontSize: 16, padding: "16px 36px" }}
+                >
+                  Open Workspace <ChevronRight size={18} />
+                </motion.button>
               </Link>
             </div>
           </motion.div>
         </section>
 
         {/* ── Footer ── */}
-        <footer className="glass-footer" style={{ textAlign: "center" }}>
-          <div>
-            SELORA · SIH Problem Statement 26166 · Space Technology / Computer Vision / Lunar Science
+        <motion.footer 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="glass-footer" 
+          style={{ textAlign: "center", padding: "2rem", background: "rgba(8, 10, 13, 0.9)" }}
+        >
+          <div style={{ fontWeight: 700, color: "var(--text-primary)", letterSpacing: "0.02em" }}>
+            Bringing Lunar Perspectives
           </div>
-          <div style={{ marginTop: 4, color: "var(--text-muted)" }}>
-            Chandrayaan-2 OHRC · TMC-2 · IIRS Registration Framework
-          </div>
-        </footer>
+        </motion.footer>
       </div>
     </div>
   );
