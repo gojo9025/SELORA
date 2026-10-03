@@ -278,7 +278,7 @@ export default function WorkspacePage() {
             sensor={refSensor}
             onSensorChange={setRefSensor}
           />
-        </div>
+        </motion.div>
 
         {/* ── Configuration ── */}
         <motion.div
@@ -343,7 +343,7 @@ export default function WorkspacePage() {
               </>
             )}
           </button>
-        </div>
+        </motion.div>
 
         {/* ── Processing Progress ── */}
         <AnimatePresence>
